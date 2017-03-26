@@ -6,11 +6,20 @@ package relop;
  */
 public class Projection extends Iterator {
 
+  Iterator it;
+  Integer[] ourFields;
+
   /**
    * Constructs a projection, given the underlying iterator and field numbers.
    */
   public Projection(Iterator iter, Integer... fields) {
-    throw new UnsupportedOperationException("Not implemented");
+    it = iter;
+    ourFields = fields;
+    this.schema = new Schema(ourFields.length);
+    Schema other = it.schema;
+    for(int i = 0; i < ourFields.length; i++){
+      other.initField(i, other.fieldType(fields[i]), other.fieldLength(fields[i]), other.fieldName(fields[i]));
+    }
   }
 
   /**
@@ -25,28 +34,28 @@ public class Projection extends Iterator {
    * Restarts the iterator, i.e. as if it were just constructed.
    */
   public void restart() {
-    throw new UnsupportedOperationException("Not implemented");
+    it.restart();
   }
 
   /**
    * Returns true if the iterator is open; false otherwise.
    */
   public boolean isOpen() {
-    throw new UnsupportedOperationException("Not implemented");
+    return it.isOpen();
   }
 
   /**
    * Closes the iterator, releasing any resources (i.e. pinned pages).
    */
   public void close() {
-    throw new UnsupportedOperationException("Not implemented");
+    it.close();
   }
 
   /**
    * Returns true if there are more tuples, false otherwise.
    */
   public boolean hasNext() {
-    throw new UnsupportedOperationException("Not implemented");
+    return it.hasNext();
   }
 
   /**
@@ -55,7 +64,12 @@ public class Projection extends Iterator {
    * @throws IllegalStateException if no more tuples
    */
   public Tuple getNext() {
-    throw new UnsupportedOperationException("Not implemented");
+    Tuple a = it.getNext();
+    Tuple b = new Tuple(this.schema);
+    for(int i = 0; i < ourFields.length; i++){
+      b.setField(i, a.getField(ourFields[i]));
+    }
+    return b;
   }
 
 } // public class Projection extends Iterator
