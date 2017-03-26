@@ -19,7 +19,7 @@ public class FileScan extends Iterator {
    * Constructs a file scan, given the schema and heap file.
    */
   public FileScan(Schema schema, HeapFile file) {
-      int fldcnt = schema.getCount();
+      //int fldcnt = schema.getCount();
       this.hf = file;
       this.schema = schema;
 
@@ -81,6 +81,8 @@ public class FileScan extends Iterator {
    * @throws IllegalStateException if no more tuples
    */
   public Tuple getNext() {
+      if (!hasNext())
+        throw new IllegalStateException("No remaining tuples");
       return new Tuple(schema, hs.getNext(last));
   }
 
