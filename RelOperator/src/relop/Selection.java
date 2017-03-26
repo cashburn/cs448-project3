@@ -7,11 +7,14 @@ package relop;
  */
 public class Selection extends Iterator {
 
+    private Predicate[] preds;
+
+
   /**
    * Constructs a selection, given the underlying iterator and predicates.
    */
   public Selection(Iterator iter, Predicate... preds) {
-    throw new UnsupportedOperationException("Not implemented");
+      this.preds = preds;
   }
 
   /**
@@ -52,7 +55,7 @@ public class Selection extends Iterator {
 
   /**
    * Gets the next tuple in the iteration.
-   * 
+   *
    * @throws IllegalStateException if no more tuples
    */
   public Tuple getNext() {
