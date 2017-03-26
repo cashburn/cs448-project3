@@ -24,6 +24,7 @@ public class KeyScan extends Iterator {
       this.schema = schema;
       this.index = index;
       this.key = key;
+      this.file = file;
       scan = index.openScan(key);
       open = true;
   }
@@ -75,8 +76,9 @@ public class KeyScan extends Iterator {
    * @throws IllegalStateException if no more tuples
    */
   public Tuple getNext() {
-      if (!hasNext())
+      /*if (!hasNext())
         throw new IllegalStateException("No remaining tuples");
+      */
       RID rid = scan.getNext();
       return new Tuple(schema, file.selectRecord(rid));
   }
