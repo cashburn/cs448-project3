@@ -76,9 +76,10 @@ public class KeyScan extends Iterator {
    * @throws IllegalStateException if no more tuples
    */
   public Tuple getNext() {
-      /*if (!hasNext())
-        throw new IllegalStateException("No remaining tuples");
-      */
+      //if (!hasNext())
+        //throw new IllegalStateException("No remaining tuples");
+
+      //System.out.printf("HasNext: %s\n", hasNext());
       RID rid = scan.getNext();
       return new Tuple(schema, file.selectRecord(rid));
   }

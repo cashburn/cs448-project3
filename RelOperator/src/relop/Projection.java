@@ -18,7 +18,7 @@ public class Projection extends Iterator {
     this.schema = new Schema(ourFields.length);
     Schema other = it.schema;
     for(int i = 0; i < ourFields.length; i++){
-      other.initField(i, other.fieldType(fields[i]), other.fieldLength(fields[i]), other.fieldName(fields[i]));
+      this.schema.initField(i, other.fieldType(fields[i]), other.fieldLength(fields[i]), other.fieldName(fields[i]));
     }
   }
 
@@ -55,12 +55,12 @@ public class Projection extends Iterator {
    * Returns true if there are more tuples, false otherwise.
    */
   public boolean hasNext() {
-    return it.hasNext();
+    return isOpen() && it.hasNext();
   }
 
   /**
    * Gets the next tuple in the iteration.
-   * 
+   *
    * @throws IllegalStateException if no more tuples
    */
   public Tuple getNext() {
