@@ -7,7 +7,10 @@ package relop;
  */
 public class Selection extends Iterator {
 
+    private Iterator iter;
     private Predicate[] preds;
+    private boolean startSelect;
+    private Tuple nextTuple;
 
 
   /**
@@ -15,6 +18,9 @@ public class Selection extends Iterator {
    */
   public Selection(Iterator iter, Predicate... preds) {
       this.preds = preds;
+      this.iter = iter;
+      this.schema = iter.schema;
+      startSelect = true;
   }
 
   /**
@@ -29,28 +35,43 @@ public class Selection extends Iterator {
    * Restarts the iterator, i.e. as if it were just constructed.
    */
   public void restart() {
-    throw new UnsupportedOperationException("Not implemented");
+      iter.restart();
+      startSelect = true;
   }
 
   /**
    * Returns true if the iterator is open; false otherwise.
    */
   public boolean isOpen() {
-    throw new UnsupportedOperationException("Not implemented");
+      return iter.isOpen();
   }
 
   /**
    * Closes the iterator, releasing any resources (i.e. pinned pages).
    */
   public void close() {
-    throw new UnsupportedOperationException("Not implemented");
+    iter.close();
   }
 
   /**
    * Returns true if there are more tuples, false otherwise.
    */
   public boolean hasNext() {
-    throw new UnsupportedOperationException("Not implemented");
+      if (!iter.hasNext())
+          return false;
+
+      Tuple tuple;
+      boolean hasNext = false;
+      while (iter.hasNext()) {
+          tuple = iter.getNext();
+          for (int i = 0; i < preds.length; i++) {
+              if (preds[i].evaluate(tuple)) {
+                  nextTuple = tuple;
+                  return true;
+              }
+          }
+      }
+      return false;
   }
 
   /**
@@ -59,7 +80,11 @@ public class Selection extends Iterator {
    * @throws IllegalStateException if no more tuples
    */
   public Tuple getNext() {
-    throw new UnsupportedOperationException("Not implemented");
+      //if (!hasNext())
+        //throw new IllegalStateException("No more tuples");
+      Tuple temp = nextTuple;
+      nextTuple = null;
+      return temp;
   }
 
 } // public class Selection extends Iterator
