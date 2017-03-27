@@ -26,7 +26,7 @@ class ROTest extends TestDriver {
 	private static final String TEST_NAME = "relational operator tests";
 
 	/** Size of tables in test3. */
-	private static final int SUPER_SIZE = 2000;
+	private static final int SUPER_SIZE = 100;
 
 	/** Drivers table schema. */
 	private static Schema s_drivers;
@@ -87,7 +87,7 @@ class ROTest extends TestDriver {
 	} // public static void main (String argv[])
 
 	/**
-	 * 
+	 *
 	 */
 	protected boolean test1() {
 		try {

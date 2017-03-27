@@ -59,8 +59,10 @@ public class SortMergeJoin extends Iterator {
         HeapFile resultTemp = new HeapFile(null);
         HeapScan leftScan = leftTemp.openScan();
         HeapScan rightScan = rightTemp.openScan();
-        HeapScan resultScan = resultTemp.openScan();
+        HeapScan resultScan;
         boolean hasNext = iter.hasNext();
+        int runs = 0;
+
         final int fieldType = iter.schema.fieldType(col);
         while (hasNext) {
             for (int i = 0; hasNext && i < bufferSize; hasNext = iter.hasNext(), i++) {
@@ -96,30 +98,31 @@ public class SortMergeJoin extends Iterator {
             }
             for (int i = 0; i < sortList.size(); i++) {
                 RID tmp = resultTemp.insertRecord(sortList.get(i).getData());
-                if (i == 0)
-                    rids.add(tmp);
             }
+            runs++;
             sortList.clear();
         }
 
         //resultScan.close();
-        //resultScan = resultTemp.openScan();
-        while (rids.size() > 1) {
-            for (int i = 1; i + 1 < rids.size(); i += 2) {
-                while (resultScan.hasNext()) {
+        resultScan = resultTemp.openScan();
+        int numRec = resultTemp.getRecCnt();
+        while (runs > 1) {
+            for (int i = 0; i + 1 < runs; i += 2) {
+                int j = 0;
+                while (resultScan.hasNext() && j < (numRec/runs)) {
                     RID tmp = new RID();
                     byte[] tuple = resultScan.getNext(tmp);
-                    if (tmp == rids.get(i))
-                        break;
                     leftTemp.insertRecord(tuple);
+                    leftScan.hasNext();
                     resultTemp.deleteRecord(tmp);
+                    j++;
                 }
-                while (resultScan.hasNext()) {
+                j = 0;
+                while (resultScan.hasNext() && j < (numRec/runs)) {
                     RID tmp = new RID();
                     byte[] tuple = resultScan.getNext(tmp);
-                    if (tmp == rids.get(i+1))
-                        break;
                     rightTemp.insertRecord(tuple);
+                    rightScan.hasNext();
                     resultTemp.deleteRecord(tmp);
                 }
 
@@ -136,25 +139,17 @@ public class SortMergeJoin extends Iterator {
                     tupleL = new Tuple(iter.schema, leftScan.getNext(ridL));
                 if (rightHas = rightScan.hasNext())
                     tupleR = new Tuple(iter.schema, rightScan.getNext(ridR));
-                int j = 0;
-                while ((leftHas = leftScan.hasNext()) && (rightHas = rightScan.hasNext())) {
-
+                j = 0;
+                while ((leftHas = leftScan.hasNext()) &&
+                    (rightHas = rightScan.hasNext())) {
                     if (fieldType == AttrType.INTEGER) {
                         if (tupleL.getIntFld(col) < tupleR.getIntFld(col)) {
                             RID tmp = resultTemp.insertRecord(tupleL.getData());
                             tupleL = new Tuple(iter.schema, leftScan.getNext(ridL));
-                            if (j == 0) {
-                                rids2.add(tmp);
-                                j++;
-                            }
                         }
                         else {
                             RID tmp = resultTemp.insertRecord(tupleR.getData());
                             tupleR = new Tuple(iter.schema, rightScan.getNext(ridR));
-                            if (j == 0) {
-                                rids2.add(tmp);
-                                j++;
-                            }
                         }
                     }
                     else
@@ -171,8 +166,9 @@ public class SortMergeJoin extends Iterator {
                     resultTemp.insertRecord(rightScan.getNext(ridR));
                 }
             }
-            rids = rids2;
-            rids2 = new ArrayList<RID>();
+            if ((runs % 2) != 0)
+                runs++;
+            runs = runs / 2;
             resultScan.close();
             resultScan = resultTemp.openScan();
         }
