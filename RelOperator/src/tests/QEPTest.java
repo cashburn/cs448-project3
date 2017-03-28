@@ -51,8 +51,12 @@ public class QEPTest extends TestDriver {
 		HeapFile file2 = new HeapFile(null);
 		HashIndex index2 = new HashIndex(null);
 		qep.initAll(file, index, file2, index2);
-		//qep.qep1(file, index, file2, index2);
-		//qep.qep2(file, index, file2, index2);
+		qep.qep1(file, index, file2, index2);
+		qep.qep2(file, index, file2, index2);
+		//qep.qep3(file, index, file2, index2);
+		//qep.qep4(file, index, file2, index2);
+		qep.qep3Simple(file, index, file2, index2);
+		qep.qep4Simple(file, index, file2, index2);
 		//System.out.println("HELLO IT ME");
 		
 	}
@@ -92,7 +96,7 @@ public class QEPTest extends TestDriver {
 				t.setStringFld(1, temp[1]);
 				t.setIntFld(2, Integer.parseInt(temp[2]));
 				t.setIntFld(3, Integer.parseInt(temp[3]));
-				t.setIntFld(3, Integer.parseInt(temp[4]));
+				t.setIntFld(4, Integer.parseInt(temp[4]));
 
 				RID rid = file2.insertRecord(t.getData());
 				index2.insertEntry(new SearchKey(Integer.parseInt(temp[0])), rid);
@@ -105,13 +109,16 @@ public class QEPTest extends TestDriver {
 
 	public void qep1(HeapFile file, HashIndex index, HeapFile file2, HashIndex index2){
 		//Display for each employee their ID, Name and age
+		System.out.println("~> QEP Test 1");
 		FileScan scan = new FileScan(s_Employee, file2);
 		Projection pro = new Projection(scan, 0, 1, 2);
 		pro.execute();
+		System.out.println();
 	}
 
 	public void qep2(HeapFile file, HashIndex index, HeapFile file2, HashIndex index2){
 		//Display the Name for the departments with MinSalary = MaxSalary
+		System.out.println("~> QEP Test 2");
 		FileScan scan = new FileScan(s_Department, file);
 		Predicate[] preds = new Predicate[] {
 				new Predicate(AttrOperator.EQ, AttrType.FIELDNO, 2, AttrType.FIELDNO,
@@ -119,15 +126,70 @@ public class QEPTest extends TestDriver {
 		Selection sel = new Selection(scan, preds);
 		Projection pro = new Projection(sel, 1);
 		pro.execute();
+		System.out.println();
 	}
 
 	public void qep3(HeapFile file, HashIndex index, HeapFile file2, HashIndex index2){
 		//For each employee, display their Name and the Name of their department as well as the
 		//minimum salary of their department
+
+		System.out.println("~> QEP Test 3");
+		FileScan scan = new FileScan(s_Department, file);
+		FileScan scan2 = new FileScan(s_Employee, file2);
+		SortMergeJoin join = new SortMergeJoin(scan2, scan, 4, 0);
+		Projection pro = new Projection(join, 1,6,7);
+		pro.execute();
+		System.out.println();
+		//Projection pro = new Projection(join, 1, )
+
 	}
 
 	public void qep4(HeapFile file, HashIndex index, HeapFile file2, HashIndex index2){
 		//Display the Name for each employee whose Salary is less than the maximum salary and
 		//greater than the minimum salary of their department
+
+		System.out.println("~> QEP Test 4");
+		FileScan scan = new FileScan(s_Department, file);
+		FileScan scan2 = new FileScan(s_Employee, file2);
+		SortMergeJoin join = new SortMergeJoin(scan2, scan, 4, 0);
+		Predicate[] preds = new Predicate[] { new Predicate(AttrOperator.GT,
+					AttrType.FIELDNO, 3, AttrType.FIELDNO, 7) };
+		Selection sel = new Selection(join, preds);
+		preds = new Predicate[] { new Predicate(AttrOperator.LT,
+					AttrType.FIELDNO, 3, AttrType.FIELDNO, 8) };
+		sel = new Selection(sel, preds);
+		Projection pro = new Projection(sel, 1,6,7);
+		pro.execute();
+		System.out.println();
+	}
+
+	public void qep3Simple(HeapFile file, HashIndex index, HeapFile file2, HashIndex index2){
+		System.out.println("~> QEP Test 3");
+		FileScan scan = new FileScan(s_Department, file);
+		FileScan scan2 = new FileScan(s_Employee, file2);
+		Predicate[] preds = new Predicate[] { new Predicate(AttrOperator.EQ,
+					AttrType.FIELDNO, 4, AttrType.FIELDNO, 5) };
+		SimpleJoin join = new SimpleJoin(scan2, scan, preds);
+		Projection pro = new Projection(join, 1,6,7);
+		pro.execute();
+		System.out.println();
+	}
+
+	public void qep4Simple(HeapFile file, HashIndex index, HeapFile file2, HashIndex index2){
+		System.out.println("~> QEP Test 4");
+		FileScan scan = new FileScan(s_Department, file);
+		FileScan scan2 = new FileScan(s_Employee, file2);
+		Predicate[] preds = new Predicate[] { new Predicate(AttrOperator.EQ,
+					AttrType.FIELDNO, 4, AttrType.FIELDNO, 5) };
+		SimpleJoin join = new SimpleJoin(scan2, scan, preds);
+		preds = new Predicate[] { new Predicate(AttrOperator.GT,
+					AttrType.FIELDNO, 3, AttrType.FIELDNO, 7) };
+		Selection sel = new Selection(join, preds);
+		preds = new Predicate[] { new Predicate(AttrOperator.LT,
+					AttrType.FIELDNO, 3, AttrType.FIELDNO, 8) };
+		sel = new Selection(sel, preds);
+		Projection pro = new Projection(sel, 1);
+		pro.execute();
+		System.out.println();
 	}
 }

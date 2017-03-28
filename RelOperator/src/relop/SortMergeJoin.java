@@ -102,8 +102,8 @@ public class SortMergeJoin extends Iterator {
             sortList.clear();
         }
 
-        //resultScan.close();
-        //resultScan = resultTemp.openScan();
+        // resultScan.close();
+        // resultScan = resultTemp.openScan();
         while (rids.size() > 1) {
             for (int i = 1; i + 1 < rids.size(); i += 2) {
                 while (resultScan.hasNext()) {
