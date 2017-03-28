@@ -180,12 +180,12 @@ public class SortMergeJoin extends Iterator {
         iter.restart();
         resultScan.close();
         resultScan = resultTemp.openScan();
-        System.out.println("New HeapFile:");
-        while (resultScan.hasNext())
-            new Tuple(iter.schema, resultScan.getNext(new RID())).print();
-        System.out.println("New Original:");
-        while (iter.hasNext())
-            iter.getNext().print();
+        // System.out.println("New HeapFile:");
+        // while (resultScan.hasNext())
+        //     new Tuple(iter.schema, resultScan.getNext(new RID())).print();
+        // System.out.println("New Original:");
+        // while (iter.hasNext())
+        //     iter.getNext().print();
         return resultTemp;
     }
 
